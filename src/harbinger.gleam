@@ -1,7 +1,7 @@
+import file_streams/file_open_mode
 import file_streams/file_stream
 import file_streams/file_stream_error
 import gleam/io
-
 import gleam/string_tree
 
 pub type LogLevel {
@@ -21,7 +21,7 @@ pub type Transport {
   NullLogger
 }
 
-pub type Tape {
+pub type Harbinger {
   Tape(log_level: LogLevel, transport: Transport)
 }
 
@@ -38,8 +38,8 @@ fn level_to_string(level: LogLevel) -> String {
   }
 }
 
-pub fn new_file_logger(log_level: LogLevel, file_name: String) -> Tape {
-  case file_stream.open_write(file_name) {
+pub fn new_file_logger(log_level: LogLevel, file_name: String) -> Harbinger {
+  case file_stream.open(file_name, [file_open_mode.Append]) {
     Ok(file_stream) -> Tape(log_level, File(file_stream))
     Error(err) -> {
       let _ = io.print_error(file_stream_error.describe(err))
@@ -48,7 +48,7 @@ pub fn new_file_logger(log_level: LogLevel, file_name: String) -> Tape {
   }
 }
 
-fn log(logger: Tape, level: LogLevel, message: String) -> Nil {
+fn log(logger: Harbinger, level: LogLevel, message: String) -> Nil {
   let msg =
     string_tree.from_strings([level_to_string(level), ": ", message, "\n"])
     |> string_tree.to_string
@@ -67,12 +67,12 @@ fn log(logger: Tape, level: LogLevel, message: String) -> Nil {
   }
 }
 
-pub fn info(logger: Tape, message: String) -> Tape {
+pub fn info(logger: Harbinger, message: String) -> Harbinger {
   log(logger, InfoLevel, message)
   logger
 }
 
-pub fn error(logger: Tape, message: String) -> Tape {
+pub fn error(logger: Harbinger, message: String) -> Harbinger {
   log(logger, ErrorLevel, message)
   logger
 }
