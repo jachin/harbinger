@@ -2,6 +2,7 @@ import file_streams/file_open_mode
 import file_streams/file_stream
 import file_streams/file_stream_error
 import gleam/io
+import gleam/string
 import gleam/string_tree
 
 pub type LogLevel {
@@ -25,7 +26,7 @@ pub type Harbinger {
   Tape(log_level: LogLevel, transport: Transport)
 }
 
-fn level_to_string(level: LogLevel) -> String {
+pub fn level_to_string(level: LogLevel) -> String {
   case level {
     EmergencyLevel -> "EMERGENCY"
     AlertLevel -> "ALERT"
@@ -35,6 +36,20 @@ fn level_to_string(level: LogLevel) -> String {
     NoticeLevel -> "NOTICE"
     InfoLevel -> "INFO"
     DebugLevel -> "DEBUG"
+  }
+}
+
+pub fn string_to_level(str: String) -> Result(LogLevel, String) {
+  case string.uppercase(str) {
+    "EMERGENCY" -> Ok(EmergencyLevel)
+    "ALERT" -> Ok(AlertLevel)
+    "CRITICAL" -> Ok(CriticalLevel)
+    "ERROR" -> Ok(ErrorLevel)
+    "WARNING" -> Ok(WarningLevel)
+    "NOTICE" -> Ok(NoticeLevel)
+    "INFO" -> Ok(InfoLevel)
+    "DEBUG" -> Ok(DebugLevel)
+    _ -> Error("Invalid log level: " <> str)
   }
 }
 
